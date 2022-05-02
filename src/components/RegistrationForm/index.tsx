@@ -11,14 +11,55 @@ import {
   genderError,
   nameError,
   phoneNoError,
+  confirmPassword,
+  password,
 } from "../../constants/formErrorMessage";
+import { registrationData } from "../../redux/actions";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useRouter } from "next/router";
 const RegisterationForm = () => {
-  const { control, handleSubmit, watch, setValue, reset } = useForm({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setError,
+    reset,
+    formState: { errors },
+  } = useForm({
     mode: "onChange",
   });
+  const storedUser = useAppSelector((state) => state.registrationFormSlice);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const user = useAppSelector((state) => state.userSlice);
+  useEffect(() => {
+    if (user.isLoggedIn) {
+      router.push("/");
+    }
+  }, []);
 
+  const watchItems = watch();
+  const checkPass = () => {
+    if (watchItems.pwd !== watchItems.cpwd) {
+      setError(
+        "cpwd",
+        { type: "password", message: "password doenot matched" },
+        { shouldFocus: true }
+      );
+    }
+  };
   const onSubmitForm = (formData: any) => {
-    console.log(formData);
+    checkPass();
+    if (storedUser.every(({ email }) => email !== formData.email)) {
+      dispatch(registrationData(formData));
+      router.push("/auth/login");
+    } else {
+      setError(
+        "email",
+        { type: "custom", message: "Email alreadt taken" },
+        { shouldFocus: true }
+      );
+    }
   };
 
   return (
@@ -125,11 +166,11 @@ const RegisterationForm = () => {
                   message: ageError.required,
                 },
                 min: {
-                  value: 18,
+                  value: 10,
                   message: ageError.min,
                 },
                 max: {
-                  value: 150,
+                  value: 100,
                   message: ageError.max,
                 },
               }}
@@ -163,10 +204,6 @@ const RegisterationForm = () => {
               name="gender"
               label="Gender"
               menuOptions={[
-                {
-                  value: "Select",
-                  label: "Select",
-                },
                 {
                   value: "Male",
                   label: "Male",
@@ -209,6 +246,44 @@ const RegisterationForm = () => {
                 maxLength: {
                   value: 150,
                   message: "Maximum 150 character is allowed.",
+                },
+              }}
+            />
+          </Box>
+          <Box sx={styles.inputWrapper}>
+            <InputField
+              customStyle={{ ...styles.fullWidth }}
+              control={control}
+              name="pwd"
+              label="Password"
+              type="password"
+              rules={{
+                required: {
+                  value: true,
+                  message: password.required,
+                },
+                pattern: {
+                  value: password.pattern,
+                  message: password.message,
+                },
+              }}
+            />
+          </Box>
+          <Box sx={styles.inputWrapper}>
+            <InputField
+              customStyle={{ ...styles.fullWidth }}
+              control={control}
+              name="cpwd"
+              label="Confirm Password"
+              type="password"
+              rules={{
+                required: {
+                  value: true,
+                  message: confirmPassword.required,
+                },
+                pattern: {
+                  value: confirmPassword.pattern,
+                  message: confirmPassword.message,
                 },
               }}
             />

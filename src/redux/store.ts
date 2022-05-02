@@ -1,4 +1,4 @@
-import { configureStore, createStore } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, TypedUseSelectorHook, useSelector } from "react-redux";
 
 import { persistStore, persistReducer } from "redux-persist";
@@ -6,7 +6,7 @@ import storage from "redux-persist/lib/storage";
 import rootReducer from "./reducers";
 
 const persistConfig = {
-  key: "formData",
+  key: "registratioDataAuth",
   storage,
 };
 

@@ -4,14 +4,37 @@ import { useForm } from "react-hook-form";
 import InputField from "../sections/Input/Index";
 import Link from "next/link";
 import styles from "./styles";
-import { emailError, nameError } from "../../constants/formErrorMessage";
+import { emailError, password } from "../../constants/formErrorMessage";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useRouter } from "next/router";
+import { storeUserData } from "../../redux/actions";
 const LoginForm = () => {
   const { control, handleSubmit, watch, setValue, reset } = useForm({
     mode: "onChange",
   });
 
+  const storedUser = useAppSelector((state) => state.registrationFormSlice);
+  const user = useAppSelector((state) => state.userSlice);
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    if (user.isLoggedIn) {
+      router.push("/", null, { shallow: true });
+    }
+  }, []);
+
   const onSubmitForm = (formData: any) => {
-    console.log(formData);
+    const userInfo = storedUser.filter(
+      ({ email, pwd }) => email === formData.email && pwd === formData.pwd
+    );
+    if (userInfo.length) {
+      const { pwd, cpwd, ...rest } = userInfo[0];
+      console.log({ ...rest });
+      const data = { ...rest, isLoggedIn: true };
+      dispatch(storeUserData(data));
+      console.log({ ...rest, isLoggedIn: true });
+      router.push("/");
+    }
   };
 
   return (
@@ -25,30 +48,6 @@ const LoginForm = () => {
             <InputField
               customStyle={styles.customStyle}
               control={control}
-              name="fName"
-              label="Name"
-              type="text"
-              rules={{
-                required: {
-                  value: true,
-                  message: nameError.required,
-                },
-                minLength: {
-                  value: 3,
-                  message: nameError.minLength,
-                },
-                maxLength: {
-                  value: 20,
-                  message: nameError.maxLength,
-                },
-              }}
-            />
-          </Box>
-
-          <Box sx={styles.inputWrapper}>
-            <InputField
-              customStyle={{ ...styles.customStyle }}
-              control={control}
               name="email"
               label="Email"
               type="email"
@@ -60,6 +59,26 @@ const LoginForm = () => {
                 pattern: {
                   value: emailError.pattern,
                   message: emailError.message,
+                },
+              }}
+            />
+          </Box>
+
+          <Box sx={styles.inputWrapper}>
+            <InputField
+              customStyle={{ ...styles.customStyle }}
+              control={control}
+              name="pwd"
+              label="Password"
+              type="password"
+              rules={{
+                required: {
+                  value: true,
+                  message: password.required,
+                },
+                pattern: {
+                  value: password.pattern,
+                  message: password.message,
                 },
               }}
             />

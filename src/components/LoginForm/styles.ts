@@ -29,6 +29,7 @@ const styles: {
   },
   signUpLink: {
     color: "#1976D2",
+    cursor: "pointer",
   },
 };
 

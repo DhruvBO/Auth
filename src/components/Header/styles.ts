@@ -24,6 +24,10 @@ const styles: {
     margin: "0 10px",
     fontSize: "large",
   },
+
+  link: {
+    color: "#fff",
+  },
 };
 
 export default styles;
